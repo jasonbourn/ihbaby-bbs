@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <title></title>
+
+    <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.js"></script>
+    <script type="text/javascript" language="javascript">
+        $(function() {
+
+            $("#test").click(function() {
+                $.ajax({
+                    type: "GET",
+                    url: "http://localhost:8088/quanzi/record/recordById?id=1004",
+                    beforeSend: function(request) {
+                        request.setRequestHeader("authorization", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInBlcm1pc3Npb24iOiJib29rYnVpbGRpbmcsYm9va2J1aWxkaW5nLmFwcGx5LGluZGV4LHBlcm1pc3Npb24scGVybWlzc2lvbi5hZGRIb3NBZG1pbixwZXJtaXNzaW9uLmdyb3VwLHBlcm1pc3Npb24udXNlcixzZXJ2aWNlTWFuYWdlLmhvc3BpdGFsLCIsImlhdCI6MTQ4OTM5OTIxNX0.ELilzHUiZ2dVPoKiHfEshpZmHP2YZa5cOYxplb8Kt7k");
+                    },
+                    success: function(result) {
+                        alert(result);
+                    }
+                });
+            });
+        });
+    </script>
+
+</head>
+<body>
+<form id="form1" runat="server">
+    <div id="v">
+    </div>
+    <input type="button" value="测试" id="test" />
+</form>
+</body>
+</html>
