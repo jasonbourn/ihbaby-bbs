@@ -7,20 +7,21 @@ redis:开源NOSQL
  
 关键代码：
 一、过滤器
-public class JwtFilter extends GenericFilterBean {
-	private Environment emv;
-	public void doFilter(final ServletRequest req, final ServletResponse res, final FilterChain chain)
-			throws IOException, ServletException {
 
-		final HttpServletRequest request = (HttpServletRequest) req;
-		final HttpServletResponse response = (HttpServletResponse) res;
-		final String authHeader = request.getHeader("authorization");
+	public class JwtFilter extends GenericFilterBean {
+		private Environment emv;
+		public void doFilter(final ServletRequest req, final ServletResponse res, final FilterChain chain)
+				throws IOException, ServletException {
 
-		if ("OPTIONS".equals(request.getMethod())) {
-			response.setStatus(HttpServletResponse.SC_OK);
+			final HttpServletRequest request = (HttpServletRequest) req;
+			final HttpServletResponse response = (HttpServletResponse) res;
+			final String authHeader = request.getHeader("authorization");
 
-			chain.doFilter(req, res);
-		} else {
+			if ("OPTIONS".equals(request.getMethod())) {
+				response.setStatus(HttpServletResponse.SC_OK);
+
+				chain.doFilter(req, res);
+			} else {
 
 			if (StringUtils.isBlank(authHeader)) {
 				throw new ServletException("Missing or invalid Authorization header");
@@ -52,6 +53,7 @@ public class JwtFilter extends GenericFilterBean {
 	}
 }
 请求过来后会检查header中的authorization  进行token验签
+	
 	if (Jwts.parser().setSigningKey(emv.getProperty("jwt.SecretKey")).parse(authHeader) != null){
 					final Claims claims = Jwts.parser().setSigningKey(emv.getProperty("jwt.SecretKey")).parseClaimsJws(authHeader).getBody();
 					request.setAttribute("claims", claims);
@@ -61,7 +63,8 @@ public class JwtFilter extends GenericFilterBean {
 
 验签通过会记录token携带信息 记录到request并放行。
 二、拦截器
-if (handler instanceof HandlerMethod) {
+
+	if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             // 默认签名
             UserPerm methodAnnotation = handlerMethod.getMethodAnnotation(UserPerm.class);
@@ -82,26 +85,26 @@ if (handler instanceof HandlerMethod) {
 
 三、登录
 
-public ApiResult login(String userName, String password){
-        password = DigestUtils.digest(password);
-        SysUser user = sysUserDao.findByNameAndPwd(userName);
-        if(user==null){
-            return ApiResult.createError("用户不存在！");
-        }else if (!user.getPassword().equals(password)){
-            return ApiResult.createError("用户名或密码错误！");
-        }else {
-            List<SysPermission> permissions = permissionDao.getPermissionList(user.getId());
-            StringBuilder builder =new StringBuilder();
-            for (SysPermission permission : permissions){
-                builder.append(permission.getPermissionKey()).append(",");
-            }//失效时间
-            Date exp = DateUtils.getDayLater(1);
-            String jwtToken = Jwts.builder().setSubject(userName).claim("permission",builder.toString()).setIssuedAt(new Date()).setExpiration(exp)
-                    .signWith(SignatureAlgorithm.HS256, jwtSecretKey).compact();
-            return ApiResult.createSuccess(jwtToken);
-        }
+	public ApiResult login(String userName, String password){
+		password = DigestUtils.digest(password);
+		SysUser user = sysUserDao.findByNameAndPwd(userName);
+		if(user==null){
+		    return ApiResult.createError("用户不存在！");
+		}else if (!user.getPassword().equals(password)){
+		    return ApiResult.createError("用户名或密码错误！");
+		}else {
+		    List<SysPermission> permissions = permissionDao.getPermissionList(user.getId());
+		    StringBuilder builder =new StringBuilder();
+		    for (SysPermission permission : permissions){
+			builder.append(permission.getPermissionKey()).append(",");
+		    }//失效时间
+		    Date exp = DateUtils.getDayLater(1);
+		    String jwtToken = Jwts.builder().setSubject(userName).claim("permission",builder.toString()).setIssuedAt(new Date()).setExpiration(exp)
+			    .signWith(SignatureAlgorithm.HS256, jwtSecretKey).compact();
+		    return ApiResult.createSuccess(jwtToken);
+		}
 
-    }
+	    }
 
 
  思路点拨：在登陆时将用户权限查出用jwt加密生成token,每次请求都携带着token访问。过滤器进行签证验收，拦截器负责匹配权限。它会把一些数据放到token中，这样我们就可以把部分业务数据直接写到token中。这样我们就无需去填充session了，从而可以实现stateless的接口。
@@ -109,6 +112,6 @@ public ApiResult login(String userName, String password){
 项目完整地址：https://github.com/jasonbourn/ihbaby-bbs.git
  
 不要做伸手党，打赏开源精神
-[attach]17[/attach]
+
  
  
