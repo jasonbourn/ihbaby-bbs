@@ -1,4 +1,5 @@
 FROM frolvlad/alpine-oraclejdk8:slim
+RUN apt-get install maven -y
 ADD pom.xml /app/
 ADD src/ /app/src/
 WORKDIR /app/
